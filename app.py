@@ -15,13 +15,20 @@ def get_image_download_link(img, filename):
 	buffered = BytesIO()
 	img.save(buffered, format="JPEG")
 	img_str = base64.b64encode(buffered.getvalue()).decode()
-	href = f'<a href="data:file/jpg;base64,{img_str}" download = {filename}>Download Result</a>'
+	href = f'<a href="data:file/jpg;base64,{img_str}" download = {filename}>download</a>'
 	return href
 
-st.title("Photo Editing App")
+st.title("Photo Editor")
+
+st.sidebar.title("How This Works:")
+st.sidebar.markdown(" - Upload an image.")
+st.sidebar.markdown(" - Choose a filter.")
+st.sidebar.markdown(" - Choose an intensity - if applicable. ")
+st.sidebar.markdown(" - View your results!")
+st.sidebar.markdown(" - Click download to save them.")
 
 uploaded_file = st.file_uploader("", type=['jpg','png','jpeg'])
-filter = st.sidebar.radio('Convert your photo to:', ['Original','Gray Image', 'Black and White', 'Pencil Sketch', 'Blur Effect', 'Sepia', 'Cartoonify', 'Vintage']) 
+filter = st.radio('Convert your photo to:', ['Original','Gray Image', 'Black and White', 'Pencil Sketch', 'Blur Effect', 'Sepia', 'Cartoonify', 'Vintage']) 
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -38,36 +45,36 @@ if uploaded_file is not None:
                 gray_scale = cv2.cvtColor(converted_img, cv2.COLOR_RGB2GRAY)
                 st.image(gray_scale, width=300)
                 grayscale = Image.fromarray(gray_scale)
-                st.sidebar.markdown(get_image_download_link(grayscale, "grayscale.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(grayscale, "grayscale.png"), unsafe_allow_html=True)
 
         elif filter == 'Black and White':
                 converted_img = np.array(image.convert('RGB'))
                 gray_scale = cv2.cvtColor(converted_img, cv2.COLOR_RGB2GRAY)
-                slider = st.sidebar.slider('Adjust the intensity', 1, 255, 127, step=1)
+                slider = st.slider('Adjust the intensity', 1, 255, 127, step=1)
                 (thresh, blackAndWhiteImage) = cv2.threshold(gray_scale, slider, 255, cv2.THRESH_BINARY)
                 st.image(blackAndWhiteImage, width=300)
                 blackandwhite = Image.fromarray(blackAndWhiteImage)
-                st.sidebar.markdown(get_image_download_link(blackandwhite, "blackandwhite.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(blackandwhite, "blackandwhite.png"), unsafe_allow_html=True)
 
         elif filter == 'Pencil Sketch':
                 converted_img = np.array(image.convert('RGB')) 
                 gray_scale = cv2.cvtColor(converted_img, cv2.COLOR_RGB2GRAY)
                 inv_gray = 255 - gray_scale
-                slider = st.sidebar.slider('Adjust the intensity', 25, 255, 125, step=2)
+                slider = st.slider('Adjust the intensity', 25, 255, 125, step=2)
                 blur_image = cv2.GaussianBlur(inv_gray, (slider,slider), 0, 0)
                 sketch = cv2.divide(gray_scale, 255 - blur_image, scale=256)
                 st.image(sketch, width=300) 
                 pencil = Image.fromarray(sketch)
-                st.sidebar.markdown(get_image_download_link(pencil, "pencil.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(pencil, "pencil.png"), unsafe_allow_html=True)
 
         elif filter == 'Blur Effect':
                 converted_img = np.array(image.convert('RGB'))
-                slider = st.sidebar.slider('Adjust the intensity', 5, 81, 33, step=2)
+                slider = st.slider('Adjust the intensity', 5, 81, 33, step=2)
                 converted_img = cv2.cvtColor(converted_img, cv2.COLOR_RGB2BGR)
                 blur_image = cv2.GaussianBlur(converted_img, (slider,slider), 0, 0)
                 st.image(blur_image, channels='BGR', width=300) 
                 blur = Image.fromarray(blur_image)
-                st.sidebar.markdown(get_image_download_link(blur, "blur.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(blur, "blur.png"), unsafe_allow_html=True)
 
         elif filter == "Sepia":
                 converted_img = np.array(image)
@@ -77,7 +84,7 @@ if uploaded_file is not None:
                 sepia[np.where(sepia > 255)] = 255 
                 st.image(sepia, width = 300)
                 sep = Image.fromarray(sepia)
-                st.sidebar.markdown(get_image_download_link(sep, "sepia.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(sep, "sepia.png"), unsafe_allow_html=True)
 
         elif filter == "Cartoonify":
                 converted_img = np.array(image.convert('RGB'))
@@ -90,7 +97,7 @@ if uploaded_file is not None:
                 cartoon2 = cv2.bitwise_and(dst, dst, mask=edges2) 
                 st.image(cartoon2, width = 300)
                 cartoon = Image.fromarray(cartoon2)
-                st.sidebar.markdown(get_image_download_link(cartoon, "cartoon.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(cartoon, "cartoon.png"), unsafe_allow_html=True)
 
         elif filter == "Vintage":
                 converted_img = np.array(image.convert('RGB'))
@@ -104,12 +111,14 @@ if uploaded_file is not None:
                         vintage_im[:,:,i] = vintage_im[:,:,i] * filter
                 st.image(vintage_im, width = 300)
                 vintage = Image.fromarray(vintage_im)
-                st.sidebar.markdown(get_image_download_link(vintage, "vintage.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(vintage, "vintage.png"), unsafe_allow_html=True)
 
 
         else: 
                 st.image(image, width=300)
-                st.sidebar.markdown(get_image_download_link(image, "image.png"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(image, "image.png"), unsafe_allow_html=True)
 
-
+with st.expander("What I Learned From This Project"):
+        st.markdown("I learned how to deal with images, how to upload them, open them, edit them, display them and be able to download them using Pillow.")
+        st.markdown("I also learned the basics of Computer Vision using OpenCV through the different 'filters' used on the images. ")
 
